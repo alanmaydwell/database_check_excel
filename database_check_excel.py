@@ -4,6 +4,7 @@ from openpyxl.utils.exceptions import IllegalCharacterError
 import datetime
 import time
 import os
+import getpass
 
 #Used to read command-line args (sys.argv)
 import sys
@@ -50,6 +51,12 @@ class SpreadsheetRun:
         """
         #Create queue to hold database checks to be handled in multi-thread run
         self.queue = Queue.Queue()
+
+        # Optional global password value
+        # If no password found in spreadsheet, getpass.getpass will be used to
+        # request one which will be used in all cases of missing passwords during
+        # the run. (in self.process_tab)
+        self.global_password = ""
 
         #Holds info about the response to the test (defaults to "no tests run")
         self.response = filename + "- no tests run"
@@ -243,6 +250,13 @@ class SpreadsheetRun:
                 #Remove any carriage returns from r_condition and replace with spaces
                 if "r_condition" in params:
                     params["r_condition"] = params["r_condition"].replace("\n"," ").replace("\r", " ")
+
+                # Missing password handling
+                # Note set once for all rows with missing passwords in run
+                if not params.get("password", ""):
+                    if not self.global_password:
+                        self.global_password = getpass.getpass("Password missing. Enter one now:")
+                    params["password"] = self.global_password
 
                 #Add params to queue for multi-thread processing
                 self.queue.put(params)
