@@ -3,6 +3,7 @@
 Create and manage database connections, run SQL queries and extract results.
 Can use either cx_Oracle or pyodbc to make the connection
 
+v0.1 initial version
 """
 from __future__ import print_function
 import time
@@ -16,7 +17,7 @@ DB_EXCEPTIONS = []
 
 try:
     import pyodbc
-except ImportError as err:
+except (ImportError, ModuleNotFoundError) as err:
     FAILED_IMPORTS.append("pyodbc")
 else:
     DB_EXCEPTIONS.append(pyodbc.Error)
@@ -24,7 +25,7 @@ else:
 try:
     import cx_Oracle
     from cx_Oracle import DatabaseError
-except ImportError as err:
+except (ImportError, ModuleNotFoundError) as err:
     FAILED_IMPORTS.append("cx_Oracle")
 else:
     DB_EXCEPTIONS.append(DatabaseError)
@@ -77,7 +78,7 @@ class DbCon(object):
         #cx_Oracle connection string
         else:
             # Direct connection - expects !<database name>,sid
-            # e.g. "!dbabc,hub"
+            # e.g. "!lh10xwbgmxq6h2j.cptix4mlxjrs.eu-west-2.rds.amazonaws.com,hub"
             if database.startswith("!") and "," in database:
                 parts = database.split(",")
                 host = parts[0][1:].strip()
@@ -175,9 +176,9 @@ class DbCon(object):
 
 # Example/test connection
 if __name__ == "__main__":
-    database = "!xxxxxxxxxxxxxxxxxxxx.eu-west-2.rds.amazonaws.com,hub"
-    username = raw_input("Username:")
-    password = raw_input("Password (will show!):")
+    database = "!lh10xwbgmxq6h2j.cptix4mlxjrs.eu-west-2.rds.amazonaws.com,hub"
+    username = input("Hub username:")
+    password = input("Hub password (will show!):")
 
     # Query with no paramters
     test_con = DbCon(username, password, database)
